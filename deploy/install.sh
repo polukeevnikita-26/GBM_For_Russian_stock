@@ -20,13 +20,22 @@ apt-get install -y -qq git python3 python3-venv python3-pip || true
 echo "==> Пользователь $APP_USER"
 id "$APP_USER" &>/dev/null || useradd --system --home "$APP_DIR" --shell /usr/sbin/nologin "$APP_USER"
 
-echo "==> Код ($BRANCH)"
-if [ -d "$APP_DIR/.git" ]; then
-  git -C "$APP_DIR" fetch origin "$BRANCH"
-  git -C "$APP_DIR" checkout -q "$BRANCH"
-  git -C "$APP_DIR" reset --hard "origin/$BRANCH"
+SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if [ -f "$SRC_DIR/telegram_bot.py" ]; then
+  echo "==> Код из локальной папки $SRC_DIR (GitHub не нужен)"
+  if [ "$SRC_DIR" != "$APP_DIR" ]; then
+    mkdir -p "$APP_DIR"
+    cp -a "$SRC_DIR/." "$APP_DIR/"
+  fi
 else
-  git clone --branch "$BRANCH" "$REPO_URL" "$APP_DIR"
+  echo "==> Код из GitHub ($BRANCH)"
+  if [ -d "$APP_DIR/.git" ]; then
+    git -C "$APP_DIR" fetch origin "$BRANCH"
+    git -C "$APP_DIR" checkout -q "$BRANCH"
+    git -C "$APP_DIR" reset --hard "origin/$BRANCH"
+  else
+    git clone --branch "$BRANCH" "$REPO_URL" "$APP_DIR"
+  fi
 fi
 
 echo "==> Python-окружение"

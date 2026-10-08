@@ -15,20 +15,31 @@
   ```
   Если вход по ключу: `ssh -i путь\к\ключу ПОЛЬЗОВАТЕЛЬ@АДРЕС_СЕРВЕРА`.
 
-## 2. Запустите установку (уже на сервере)
+## 2. Скопируйте проект на сервер и запустите установку
 
+Работает и для приватного репозитория: GitHub с сервера не нужен.
+
+**На ноутбуке** (папка проекта, ветка `Bot_version`):
 ```bash
-curl -fsSL https://raw.githubusercontent.com/polukeevnikita-26/gbm_for_russian_stock/Bot_version/deploy/install.sh -o install.sh
-sudo bash install.sh
+git clone -b Bot_version https://github.com/polukeevnikita-26/gbm_for_russian_stock.git
+scp -r gbm_for_russian_stock ПОЛЬЗОВАТЕЛЬ@АДРЕС_СЕРВЕРА:~/
+```
+(если клон уже есть: `git checkout Bot_version && git pull`, затем `scp -r` папки).
+
+**На сервере:**
+```bash
+ssh ПОЛЬЗОВАТЕЛЬ@АДРЕС_СЕРВЕРА
+cd ~/gbm_for_russian_stock
+sudo bash deploy/install.sh
 ```
 
-Скрипт спросит токен (ввод скрыт) и сам: поставит пакеты, склонирует код в
+Скрипт спросит токен (ввод скрыт) и сам: поставит пакеты, скопирует код в
 `/opt/GBM_For_Russian_stock`, создаст venv, установит зависимости, сохранит токен в
 `/etc/gbm-bot.env` (права 600) и запустит systemd-сервис `gbm-bot` с автозапуском.
 
-> Если репозиторий приватный, `curl` по raw-ссылке не сработает: скопируйте файл с ноутбука —
-> `scp deploy/install.sh ПОЛЬЗОВАТЕЛЬ@АДРЕС_СЕРВЕРА:~/` — и задайте URL с токеном GitHub
-> или deploy-ключом: `sudo REPO_URL=git@github.com:... bash install.sh`.
+> Для публичного репозитория можно скачать только скрипт:
+> `curl -fsSL https://raw.githubusercontent.com/polukeevnikita-26/gbm_for_russian_stock/Bot_version/deploy/install.sh -o install.sh`
+> (для приватного вернёт 404 — используйте `scp` выше).
 
 ## 3. Проверьте
 
@@ -39,7 +50,8 @@ sudo bash install.sh
 ## Обновление / управление
 
 ```bash
-sudo bash install.sh          # подтянуть новую версию кода и перезапустить (токен остаётся)
+# обновление: на ноутбуке git pull + scp -r, на сервере снова sudo bash deploy/install.sh
+# (скрипт копирует код из текущей папки, токен остаётся) — подтянуть новую версию кода и перезапустить (токен остаётся)
 sudo systemctl restart gbm-bot
 sudo systemctl stop gbm-bot
 ```
