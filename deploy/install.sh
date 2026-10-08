@@ -15,7 +15,7 @@ APP_USER=gbmbot
 
 echo "==> Установка системных пакетов"
 apt-get update -qq
-apt-get install -y -qq git python3 python3-venv python3-pip
+apt-get install -y -qq git python3 python3-venv python3-pip || true
 
 echo "==> Пользователь $APP_USER"
 id "$APP_USER" &>/dev/null || useradd --system --home "$APP_DIR" --shell /usr/sbin/nologin "$APP_USER"
@@ -30,9 +30,14 @@ else
 fi
 
 echo "==> Python-окружение"
-[ -d "$APP_DIR/.venv" ] || python3 -m venv "$APP_DIR/.venv"
+"${PYTHON:-python3}" -c 'import sys; sys.exit(sys.version_info < (3, 9))' || {
+  echo "Нужен Python 3.9+ (сейчас: $(python3 --version)). venv использует системный Python,"
+  echo "поэтому поставьте новый (deadsnakes/pyenv/uv) и запустите: PYTHON=python3.11 sudo -E bash $0"
+  exit 1
+}
+[ -d "$APP_DIR/.venv" ] || "${PYTHON:-python3}" -m venv "$APP_DIR/.venv"
 "$APP_DIR/.venv/bin/pip" install -q --upgrade pip
-"$APP_DIR/.venv/bin/pip" install -q -r "$APP_DIR/requirements.txt"
+"$APP_DIR/.venv/bin/pip" install -q -r "$APP_DIR/requirements-bot.txt"
 chown -R "$APP_USER": "$APP_DIR"
 
 echo "==> Токен"

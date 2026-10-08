@@ -1,0 +1,7 @@
+numpy
+pandas
+matplotlib
+requests
+arch
+openpyxl
+python-telegram-bot>=21

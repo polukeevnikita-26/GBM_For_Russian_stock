@@ -54,7 +54,7 @@ sudo systemctl stop gbm-bot
 git clone -b Bot_version https://github.com/polukeevnikita-26/gbm_for_russian_stock.git
 cd gbm_for_russian_stock
 python3 -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+pip install -r requirements-bot.txt
 export TELEGRAM_BOT_TOKEN=...                            # Windows PowerShell: $env:TELEGRAM_BOT_TOKEN="..."
 python telegram_bot.py
 ```
