@@ -53,7 +53,7 @@ def _num(s):
 
 def parse_query(text):
     """-> dict(ticker, months, days, target, barrier). ValueError при плохом формате."""
-    parts = [p.strip() for p in re.split(r'[;\n]|(?<!\d),|,(?!\d)', text) if p.strip()]
+    parts = [p.strip() for p in re.split(r'[;\n]|(?<=\D),|,\s+', text) if p.strip()]
     # запятая — разделитель полей; запятая внутри числа (3,5) не режет
     if len(parts) != 4:
         raise ValueError('Нужно 4 значения через запятую: тикер, срок, цена на 12 мес, барьер.')
