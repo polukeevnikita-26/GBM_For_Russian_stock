@@ -4,9 +4,9 @@ Telegram-бот: принимает запрос «тикер, срок, цен�
 запускает моделирование из probability_cli.run() и отвечает текстом и графиком.
 
 Примеры сообщений:
-    GAZP, 3 мес, 120, 120
+    GAZP, 3 мес, 120, 120      (барьер = 120% от текущей цены)
     SBER, 90 дн, 350, 105%
-    LKOH, 6, 8500, 7500        (срок без единицы = месяцы)
+    LKOH, 6, 8500, 90        (срок без единицы = месяцы)
 
 Запуск:
     export TELEGRAM_BOT_TOKEN=...   # токен от @BotFather
@@ -40,7 +40,7 @@ HELP = (
     '<code>GAZP, 3 мес, 120, 120</code>\n'
     '<code>SBER, 90 дн, 350, 105%</code>\n\n'
     '• срок: «3 мес» или «90 дн» (без единицы — месяцы)\n'
-    '• барьер: цена (120) или % от текущей цены (105%)\n'
+    '• барьер: всегда в % от текущей цены (120 = 120% от текущей; знак % необязателен)\n'
     f'• максимальный срок — {MAX_MONTHS} мес.'
 )
 
@@ -74,9 +74,10 @@ def parse_query(text):
         target_v = _num(target)
     except ValueError:
         raise ValueError(f'Цена аналитиков должна быть числом: {target}')
-    barrier = barrier.replace(' ', '').replace(',', '.')
-    if not re.fullmatch(r'\d+(\.\d+)?%?', barrier):
-        raise ValueError(f'Барьер — число или процент (105%): {barrier}')
+    barrier = barrier.replace(' ', '').replace(',', '.').rstrip('%')
+    if not re.fullmatch(r'\d+(\.\d+)?', barrier) or float(barrier) <= 0:
+        raise ValueError(f'Барьер — положительное число, % от текущей цены: {barrier}')
+    barrier += '%'
     eff_months = months if months is not None else days / 30.4368
     if eff_months <= 0 or eff_months > MAX_MONTHS:
         raise ValueError(f'Срок должен быть от 0 до {MAX_MONTHS} мес.')
