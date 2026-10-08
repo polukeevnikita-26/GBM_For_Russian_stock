@@ -113,3 +113,20 @@ jupyter notebook "Вероятность цены по GARCH.ipynb"
 ```
 
 Access to the ISS MOEX API may require a Russian IP address (or VPN).
+
+---
+
+## Telegram-бот / Telegram bot
+
+`telegram_bot.py` принимает сообщение вида `GAZP, 3 мес, 120, 120`
+(тикер, срок, цена аналитиков на 12 мес, барьер) и отвечает вероятностью и графиком.
+Срок: `3 мес` / `90 дн` (без единицы — месяцы); барьер: цена (`120`) или `105%` от текущей.
+
+Развёртывание на Linux-сервере (нужен IP, с которого доступен iss.moex.com и api.telegram.org):
+
+```bash
+sudo useradd -r gbmbot; sudo git clone <repo> /opt/GBM_For_Russian_stock
+cd /opt/GBM_For_Russian_stock && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+echo 'TELEGRAM_BOT_TOKEN=<токен от @BotFather>' | sudo tee /etc/gbm-bot.env
+sudo cp deploy/gbm-bot.service /etc/systemd/system/ && sudo systemctl enable --now gbm-bot
+```

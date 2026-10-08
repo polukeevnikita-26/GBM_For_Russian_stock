@@ -1,0 +1,15 @@
+[Unit]
+Description=GBM Russian stock Telegram bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=gbmbot
+WorkingDirectory=/opt/GBM_For_Russian_stock
+EnvironmentFile=/etc/gbm-bot.env
+ExecStart=/opt/GBM_For_Russian_stock/.venv/bin/python telegram_bot.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

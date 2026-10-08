@@ -5,3 +5,4 @@ requests
 arch
 jupyter
 openpyxl
+python-telegram-bot>=21
